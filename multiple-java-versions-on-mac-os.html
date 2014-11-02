@@ -1,0 +1,73 @@
+I like <a href="http://linux.about.com/library/cmd/blcmdl8_alternatives.htm">alternatives</a> utility on linux which allows managing multiple versions of the same application. Unfortunately Mac OS does not have such utility therefore one needs to manage dependencies on his own. For java dev such important dependency is obviously java.<br/><br/>
+
+It took me a while to understand the directory structure of java versions 6, 7 and 8 which are installed on a newly released Mac OS 10.10 Yosemite.<br/><br/>
+
+It is known that Oracle does not support java 6 for Mac OS and instead Apple has its own version: http://support.apple.com/kb/dl1572<br/><br/>
+
+After installing it or updating to Yosemite the java directory layout looks like that:<br/><br/>
+
+<code>
+$ which java<br/>
+/usr/bin/java<br/><br/>
+
+$ ls -laF /usr/bin/java<br/>
+lrwxr-xr-x  1 root  wheel  77 Oct 29 20:34 /usr/bin/java@ -> /System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands/java<br/><br/>
+
+$ ls -laF /System/Library/Frameworks/JavaVM.framework/Versions<br/>
+drwxr-xr-x  11 root  wheel  374 Oct 29 20:33 ./<br/>
+drwxr-xr-x  10 root  wheel  340 Oct 29 20:20 ../<br/>
+lrwxr-xr-x   1 root  wheel   10 Oct 29 20:20 1.4@ -> CurrentJDK<br/>
+lrwxr-xr-x   1 root  wheel   10 Oct 29 20:20 1.4.2@ -> CurrentJDK<br/>
+lrwxr-xr-x   1 root  wheel   10 Oct 29 20:20 1.5@ -> CurrentJDK<br/>
+lrwxr-xr-x   1 root  wheel   10 Oct 29 20:20 1.5.0@ -> CurrentJDK<br/>
+lrwxr-xr-x   1 root  wheel   10 Oct 29 20:20 1.6@ -> CurrentJDK<br/>
+lrwxr-xr-x   1 root  wheel   10 Oct 29 20:20 1.6.0@ -> CurrentJDK<br/>
+drwxr-xr-x   7 root  wheel  238 Oct 29 20:20 A/<br/>
+lrwxr-xr-x   1 root  wheel   54 Oct 29 20:27 Current@ -> /System/Library/Frameworks/JavaVM.framework/Versions/A<br/>
+lrwxr-xr-x   1 root  wheel   58 Oct 29 20:33 CurrentJDK@ -> /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents
+</code><br/><br/>
+
+After installing java 7 and 8 JDK, they land to the following directories:<br/><br/>
+
+<code>
+$ ls -laF /Library/Java/JavaVirtualMachines/<br/>
+drwxr-xr-x  5 root  wheel  170 Oct 29 20:39 ./<br/>
+drwxrwxr-x  5 root  wheel  170 Oct 29 20:20 ../<br/>
+drwxr-xr-x  3 root  wheel  102 Oct 23 21:28 jdk1.7.0_71.jdk/<br/>
+drwxr-xr-x  3 root  wheel  102 Oct 29 20:39 jdk1.8.0_25.jdk/
+</code><br/><br/>
+
+Note the path difference between <code>/Library/Java/JavaVirtualMachines/</code> for java 7, 8 and <code>/System/Library/Java/JavaVirtualMachines</code> for java 6<br/><br/>
+
+Now we need to make these versions live together and provide flexibility for choosing necessary default java version.<br/>
+One can do it by following next two steps.<br/><br/>
+
+<b>Step 1: Map CurrentJDK to the necessary version</b><br/><br/>
+
+I need java 7 to be default, so<br/><br/>
+<code>
+$ sudo rm -f /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK<br/>
+$ sudo ln -s /Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK<br/><br/>
+<code>
+
+<b>Step 2: Remap /usr/bin/<binary_name> to /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home/bin/<binary_name></b><br/><br/>
+I have written a small python2.7 script for migrating binaries to CurrentJDK: <a href="https://github.com/tasyrkin/scripts/blob/master/remap_java.py">remap java</a>.<br/>
+<code>python remap_java.py</code><br/>
+<b>NOTE: the script requires root privileges</b><br/><br/>
+
+That is it!<br/><br/>
+
+For making default another version, we need to repeat the first step. For example, to change to java 8 do:<br/><br/>
+<code>
+$ sudo rm -f /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK<br/>
+$ sudo ln -s /Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK<br/><br/>
+<code>
+
+<code>
+$ java -version<br/>
+java version "1.8.0_25"<br/>
+Java(TM) SE Runtime Environment (build 1.8.0_25-b17)<br/>
+Java HotSpot(TM) 64-Bit Server VM (build 25.25-b02, mixed mode)
+</code><br/><br/>
+
+Happy coding!<br/>

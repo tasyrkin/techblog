@@ -1,0 +1,40 @@
+If you develop using Intellij IDEA on Ubuntu, then it is handy to have launcher on unity panel. There are <b>three</b> relatively easy steps to make it happen:<br/><br/>
+
+<b>1. Get current Unity launcher configuration</b><br/><br/>
+
+<pre class="brush:java;">
+gsettings get com.canonical.Unity.Launcher favorites
+</pre><br/>
+
+Output:<br/><br/>
+
+<code>
+['application://nautilus-home.desktop', 'application://firefox.desktop', 'unity://running-apps', 'unity://expo-icon', 'unity://devices']
+</code><br/><br/>
+
+<b>2. Create IDEA desktop launcher</b><br/><br/>
+
+<pre class="brush:java;">
+sudo vim /usr/share/applications/idea.desktop
+</pre><br/>
+
+Copy this content into the file and save it:<br/><br/>
+
+<pre class="brush:java;">
+[Desktop Entry]
+Name=Intellij IDEA 12
+Comment=Development IDE
+Exec=idea
+Icon=/opt/idea12.0.4/bin/idea.png
+Terminal=false
+Type=Application
+Categories=Development;IDE;
+</pre>
+
+<b>3. Update Unity launcher configuration</b><br/><br/>
+
+<code>
+gsettings set com.canonical.Unity.Launcher favorites "['application://nautilus-home.desktop', <b>'application://idea.desktop'</b>, 'application://firefox.desktop', 'unity://running-apps', 'unity://expo-icon', 'unity://devices']"
+</code><br/><br/>
+
+Launcher is ready to be used 

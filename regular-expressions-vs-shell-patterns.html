@@ -1,0 +1,19 @@
+Today I have discovered an important difference between <a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/Regular-Expressions.html#Regular-Expressions">regular expressions</a> and <a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/Shell-Pattern-Matching.html">shell patterns</a> in a context of file searching in Linux. Their both applications may be found in a powerful utility <i>find</i>. Its arguments -name, -path and -wholename are interpreted as shell patterns, and -regex - as regular expressions.
+<br/>
+The difference between regular expressions and shell patterns is in how some characters are interpreted. 
+<br/>
+Let's consider a star character (*). In shell pattern it is interpreted as match of zero or more characters. In regular expression is interpreted differently: it matches preceding  character or group zero or more times.
+<br/>
+For example, the string '*tmp' will match all strings ending with <i>tmp</i> by shell pattern processor, but regular expression processor won't match anything at all! In order to write an equivalent regular expression of a shell pattern we have to write '.*tmp'. 
+<br/>
+These commands are equivalent:
+<br/>
+<code>
+find . -name '*tmp'
+</code>
+<br/>
+<code>
+find . -regex '.*tmp'
+</code>
+<br/>
+So be careful when writing matching expressions and know how it is interpreted.

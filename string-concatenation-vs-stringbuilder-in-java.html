@@ -1,0 +1,76 @@
+Lets consider two ways of concatenating Strings in Java.<br/>
+The most common way to do so is to use operator +:<br/>
+
+<pre class="brush:java;">
+public String concatenateWithPlus(String s1, String s2){
+  return "concatenated=" + s1 + s2;
+}
+</pre>
+
+Another way is to use StringBuilder:<br/>
+
+<pre class="brush:java;">
+public String concatenateWithStringBuilder(String s1, String s2){
+  final StringBuilder result = new StringBuilder();
+  result.append("concatenated=");
+  result.append(s1);
+  result.append(s2);
+  return result.toString();
+}
+</pre>
+
+<b>The question is</b> which method is faster and consumes less resources?<br/><br/>
+
+It seems natural to think that + operator creates a new instance of a String every time it is applied. However, lets look into the bytecodes generated for these two snippets.<br/>
+
+<pre class="brush:java;">
+  public java.lang.String concatenateWithPlus(java.lang.String, java.lang.String);
+    Code:
+   0: new           #2  // class java/lang/StringBuilder
+   3: dup
+   4: invokespecial #3  // Method java/lang/StringBuilder."<init>":()V
+   7: ldc           #4  // String concatenated=
+   9: invokevirtual #5  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+  12: aload_1
+  13: invokevirtual #5  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+  16: aload_2
+  17: invokevirtual #5  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+  20: invokevirtual #6  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+  23: areturn
+</pre>
+
+<pre class="brush:java;">
+  public java.lang.String concatenateWithStringBuilder(java.lang.String, java.lang.String);
+    Code:
+   0: new           #2  // class java/lang/StringBuilder
+   3: dup
+   4: invokespecial #3  // Method java/lang/StringBuilder."<init>":()V
+   7: astore_3
+   8: aload_3
+   9: ldc           #4  // String concatenated=
+  11: invokevirtual #5  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+  14: pop
+  15: aload_3
+  16: aload_1
+  17: invokevirtual #5  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+  20: pop
+  21: aload_3
+  22: aload_2
+  23: invokevirtual #5  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+  26: pop
+  27: aload_3
+  28: invokevirtual #6  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+  31: areturn
+</pre>
+
+As we see the compiler uses StringBuilder in the bytecode for both cases! So both variants don't create unnecessary String instances, and moreover, the second case requires two more instructions per concatenation (pop and aload_3), therefore is slower than the first one!<br/><br/>
+
+Take away from this example is that we should look into the bytecode more often and verify our assumptions with the compiler.<br/><br/>
+
+PS:<br/>
+These are the commands to generate bytecode from a Java source:<br/>
+
+<pre class="brush:bash">
+javac MyClass.java
+javap -c MyClass > MyClass.bc
+</pre>

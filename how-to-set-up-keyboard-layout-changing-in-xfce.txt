@@ -1,0 +1,10 @@
+<div>
+One may change keyboard layout in xcfe with the following command:</div>
+<br />
+<div>
+<code>
+setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,de,it</div>
+</code>
+<br />
+<div>
+Moreover most users may want to do it only once on login. For this reason the command has to be saved in&nbsp;whether&nbsp;~/.profile or&nbsp;~/.bash_profile or&nbsp;~/.bash_login if one of the two latter files exist.&nbsp;</div>
